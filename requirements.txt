@@ -1,0 +1,5 @@
+tensorflow==2.1.0
+jupyter
+soundfile==0.10.3.post1
+seaborn==0.10.0
+python_speech_features==0.6

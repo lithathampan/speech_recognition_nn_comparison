@@ -1,0 +1,120 @@
+# Standard Modules
+import json
+import numpy as np
+import random
+import scipy.io.wavfile as wav
+from python_speech_features import mfcc
+from utils import spectrogram_from_file, text_to_int_sequence,  calc_feat_dim ,soundfile_load
+RNG_SEED = 123
+
+class AudioGenerator():
+    def __init__(self, step=10, window=20, max_freq=8000, mfcc_dim=13,
+        minibatch_size=20, desc_file=None, spectrogram=True, max_duration=10.0, 
+        sort_by_duration=False):
+        """
+        Params:
+            step (int): Step size in milliseconds between windows (for spectrogram ONLY)
+            window (int): FFT window size in milliseconds (for spectrogram ONLY)
+            max_freq (int): Only FFT bins corresponding to frequencies between
+                [0, max_freq] are returned (for spectrogram ONLY)
+            desc_file (str, optional): Path to a JSON-line file that contains
+                labels and paths to the audio files. If this is None, then
+                load metadata right away
+        """
+
+        self.feat_dim = calc_feat_dim(window, max_freq)
+        self.mfcc_dim = mfcc_dim
+        self.feats_mean = np.zeros((self.feat_dim,))
+        self.feats_std = np.ones((self.feat_dim,))
+        self.rng = random.Random(RNG_SEED)
+        if desc_file is not None:
+            self.load_metadata_from_desc_file(desc_file)
+        self.step = step
+        self.window = window
+        self.max_freq = max_freq
+        self.cur_train_index = 0
+        self.cur_valid_index = 0
+        self.cur_test_index = 0
+        self.max_duration=max_duration
+        self.minibatch_size = minibatch_size
+        self.spectrogram = spectrogram
+        self.sort_by_duration = sort_by_duration
+
+    def load_train_data(self, desc_file='train_corpus.json'):
+        self.load_metadata_from_desc_file(desc_file, 'train')
+        self.fit_train()
+        if self.sort_by_duration:
+            self.sort_data_by_duration('train')
+    def load_metadata_from_desc_file(self, desc_file, partition):
+        """ Read metadata from a JSON-line file
+            (possibly takes long, depending on the filesize)
+        Params:
+            desc_file (str):  Path to a JSON-line file that contains labels and
+                paths to the audio files
+            partition (str): One of 'train', 'validation' or 'test'
+        """
+        audio_paths, durations, texts = [], [], []
+        with open(desc_file) as json_line_file:
+            for line_num, json_line in enumerate(json_line_file):
+                try:
+                    spec = json.loads(json_line)
+                    if float(spec['duration']) > self.max_duration:
+                        continue
+                    audio_paths.append(spec['key'])
+                    durations.append(float(spec['duration']))
+                    texts.append(spec['text'])
+                except Exception as e:
+                    # Change to (KeyError, ValueError) or
+                    # (KeyError,json.decoder.JSONDecodeError), depending on
+                    # json module version
+                    print('Error reading line #{}: {}'
+                                .format(line_num, json_line))
+        if partition == 'train':
+            self.train_audio_paths = audio_paths
+            self.train_durations = durations
+            self.train_texts = texts
+        elif partition == 'validation':
+            self.valid_audio_paths = audio_paths
+            self.valid_durations = durations
+            self.valid_texts = texts
+        elif partition == 'test':
+            self.test_audio_paths = audio_paths
+            self.test_durations = durations
+            self.test_texts = texts
+        else:
+            raise Exception("Invalid partition to load metadata. "
+             "Must be train/validation/test")
+            
+    def fit_train(self, k_samples=100):
+        """ Estimate the mean and std of the features from the training set
+        Params:
+            k_samples (int): Use this number of samples for estimation
+        """
+        k_samples = min(k_samples, len(self.train_audio_paths))
+        samples = self.rng.sample(self.train_audio_paths, k_samples)
+        feats = [self.featurize(s) for s in samples]
+        feats = np.vstack(feats)
+        self.feats_mean = np.mean(feats, axis=0)
+        self.feats_std = np.std(feats, axis=0)
+        
+    def featurize(self, audio_clip_path):
+        """ For a given audio clip, calculate the corresponding feature
+        Params:
+            audio_clip_path (str): Path to the audio clip
+        """
+        if self.spectrogram:
+            return spectrogram_from_file(
+                audio_clip_path, step=self.step, window=self.window,
+                max_freq=self.max_freq)
+        else:
+            (rate, sig) = wav.read(audio_clip_path)
+            return mfcc(sig, rate, numcep=self.mfcc_dim)
+    def normalize(self, feature, eps=1e-14):
+        """ Center a feature using the mean and std
+        Params:
+            feature (numpy.ndarray): Feature to normalize
+        """
+        return (feature - self.feats_mean) / (self.feats_std + eps)
+
+
+
