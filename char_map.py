@@ -40,5 +40,5 @@ index_map = {}
 for line in char_map_str.strip().split('\n'):
     ch, index = line.split()
     char_map[ch] = int(index)
-    index_map[int(index)] = ch  # removed +1 to maintain consistency
+    index_map[int(index)+1] = ch  # removed +1 to maintain consistency
 index_map[2] = ' '

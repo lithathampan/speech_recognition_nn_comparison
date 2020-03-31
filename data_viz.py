@@ -29,7 +29,6 @@ class AudioVisualizer:
         plt.ylabel('Amplitude')
         plt.show()
 
-    
     def plot_mfcc_feature(self,normalized = True):
         # plot the MFCC feature
         fig = plt.figure(figsize=(12,5))
@@ -43,7 +42,7 @@ class AudioVisualizer:
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("right", size="5%", pad=0.05)
         plt.colorbar(im, cax=cax)
-        ax.set_xticks(np.arange(0, 13, 2), minor=False);
+        ax.set_xticks(np.arange(0, 13, 2), minor=False)
         plt.show()
     
     def plot_spectrogram_feature(self,normalized = True):

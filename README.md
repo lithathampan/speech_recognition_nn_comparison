@@ -48,7 +48,11 @@ Install required packages
 ```bash
 pip install -r requirements.txt
 ```
+Remove existing in case of reinstalls
 
+```bash
+ pip freeze | xargs pip uninstall -y
+ ```
 
 # Data Set up
 

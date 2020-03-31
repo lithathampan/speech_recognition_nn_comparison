@@ -114,5 +114,30 @@ def spectrogram_from_file(filename, step=10, window=20, max_freq=None,
     ind = np.where(freqs <= max_freq)[0][-1] + 1
     return np.transpose(np.log(pxx[:ind, :] + eps))
 
+def sort_data(audio_paths, durations, texts):
+    """ Sort the data by duration 
+    Params:
+        audio_paths (list): Paths to audio clips
+        durations (list): Durations of utterances for each audio clip
+        texts (list): Sentences uttered in each audio clip
+    """
+    p = np.argsort(durations).tolist()
+    audio_paths = [audio_paths[i] for i in p]
+    durations = [durations[i] for i in p] 
+    texts = [texts[i] for i in p]
+    return audio_paths, durations, texts
 
+def shuffle_data(audio_paths, durations, texts):
+    """ Shuffle the data (called after making a complete pass through 
+        training or validation data during the training process)
+    Params:
+        audio_paths (list): Paths to audio clips
+        durations (list): Durations of utterances for each audio clip
+        texts (list): Sentences uttered in each audio clip
+    """
+    p = np.random.permutation(len(audio_paths))
+    audio_paths = [audio_paths[i] for i in p] 
+    durations = [durations[i] for i in p] 
+    texts = [texts[i] for i in p]
+    return audio_paths, durations, texts
 #print(spectrogram_from_file('../LibriSpeech/dev-clean/1272/128104/1272-128104-0001.wav').shape)
