@@ -1,8 +1,8 @@
-from keras import backend as K
-from keras.models import Model
-from keras.layers import (BatchNormalization, Conv1D, Dense, Input, 
+from tensorflow.keras import backend as K
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import (BatchNormalization, Conv1D, Dense, Input, 
     TimeDistributed, Activation, Bidirectional, SimpleRNN, GRU, LSTM)
-#from keras.initializers import VarianceScaling
+from tensorflow.keras.initializers import VarianceScaling
 def simple_rnn_model(input_dim, output_dim=29):
     """ Build a recurrent network for speech 
     """
@@ -30,7 +30,7 @@ def rnn_model(input_dim, units, activation, output_dim=29):
     simp_rnn = GRU(units, activation=activation,
         return_sequences=True, implementation=2, name='rnn')(input_data)
     # TODO: Add batch normalization 
-    bn_rnn = BatchNormalization( name='bn_rnn_1d')(simp_rnn)
+    bn_rnn = BatchNormalization(axis = -1, name='bn_rnn_1d')(simp_rnn)
     # TODO: Add a TimeDistributed(Dense(output_dim)) layer
     time_dense = TimeDistributed(Dense(output_dim))(bn_rnn)
     # Add softmax activation layer
@@ -117,7 +117,7 @@ def deep_rnn_model(input_dim, units, recur_layers, output_dim=29):
         layer = GRU(units, return_sequences=True, activation='relu')(layer)
         layer = BatchNormalization(name='bt_rnn_last_rnn')(layer)
     # TODO: Add a TimeDistributed(Dense(output_dim)) layer
-    time_dense = TimeDistributed(Dense(output_dim))(layer)
+    time_dense = TimeDistributed(Dense(output_dim,activation='relu'))(layer)
     # Add softmax activation layer
     y_pred = Activation('softmax', name='softmax')(time_dense)
     # Specify the model

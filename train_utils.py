@@ -4,19 +4,21 @@ Defines a functions for training a NN.
 
 from data_gen import AudioGenerator
 import _pickle as pickle
-from keras import metrics
-from keras import backend as K
-from keras.models import Model
-from keras.layers import (Input, Lambda)
-from keras.optimizers import SGD,Adam
-from keras.callbacks import ModelCheckpoint  #,TensorBoard
-from keras import losses 
+from tensorflow import keras
+from tensorflow.keras import metrics
+from tensorflow.keras import backend as K
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import (Input, Lambda)
+from tensorflow.keras.optimizers import SGD,Adam
+from tensorflow.keras.callbacks import ModelCheckpoint  ,TensorBoard
+from tensorflow.keras import losses 
 from pprint import pprint
 import datetime
 import os
 
 def ctc_lambda_func(args):
     y_pred, labels, input_length, label_length = args
+    #print(args)
     return K.ctc_batch_cost(labels, y_pred, input_length, label_length)
 
 def add_ctc_loss(input_to_softmax):
@@ -39,8 +41,9 @@ def train_model(input_to_softmax,
                 minibatch_size=20,
                 spectrogram=True,
                 mfcc_dim=13,
-                optimizer=SGD(lr=0.02, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5),
-                #optimizer=Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False),
+                #optimizer=SGD(lr=0.02, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5),
+                #optimizer=SGD()
+                optimizer=Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.9999, amsgrad=False),
                 epochs=20,
                 verbose=1,
                 sort_by_duration=False,
@@ -73,17 +76,18 @@ def train_model(input_to_softmax,
 
     # add checkpointer
     checkpointer = ModelCheckpoint(filepath='results/'+save_model_path, verbose=0)
-    #log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    #tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
+    log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
 
     # train the model
-    hist = model.fit_generator(generator=audio_gen.next_train(), steps_per_epoch=steps_per_epoch,
+    hist = model.fit(x=audio_gen.next_train(), steps_per_epoch=steps_per_epoch,
         epochs=epochs, validation_data=audio_gen.next_valid(), validation_steps=validation_steps,
-        callbacks=[checkpointer], verbose=verbose)
+        callbacks=[checkpointer,tensorboard_callback], verbose=verbose)
     #pprint(audio_gen.next_train())
-    #score = model.evaluate(x=audio_gen.next_test(), verbose=1,steps =steps_per_epoch)
-    #print('Test loss:', score[0])
-    #print('Test accuracy:', score[1])
+    audio_gen.load_test_data('test_corpus.json')
+    score = model.evaluate(x=audio_gen.next_test(), verbose=1,steps =steps_per_epoch)
+    print('Test loss:', score[0])
+    print('Test accuracy:', score[1])
     '''    .fit(x=, y=,
           batch_size=None, epochs=,
           verbose=1, validation_data=None,
