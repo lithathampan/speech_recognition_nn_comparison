@@ -84,10 +84,12 @@ def train_model(input_to_softmax,
         epochs=epochs, validation_data=audio_gen.next_valid(), validation_steps=validation_steps,
         callbacks=[checkpointer,tensorboard_callback], verbose=verbose)
     #pprint(audio_gen.next_train())
+    '''
     audio_gen.load_test_data('test_corpus.json')
     score = model.evaluate(x=audio_gen.next_test(), verbose=1,steps =steps_per_epoch)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
+    '''
     '''    .fit(x=, y=,
           batch_size=None, epochs=,
           verbose=1, validation_data=None,
