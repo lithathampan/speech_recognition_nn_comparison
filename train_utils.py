@@ -43,7 +43,7 @@ def train_model(input_to_softmax,
                 mfcc_dim=13,
                 #optimizer=SGD(lr=0.02, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5),
                 #optimizer=SGD()
-                optimizer=Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.9999, amsgrad=False),
+                optimizer=Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.9999, amsgrad=True),
                 epochs=20,
                 verbose=1,
                 sort_by_duration=False,
