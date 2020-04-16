@@ -67,7 +67,7 @@ def train_model(input_to_softmax,
     model = add_ctc_loss(input_to_softmax)
 
     # CTC loss is implemented elsewhere, so use a dummy lambda function for the loss
-    model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=optimizer,metrics=[metrics.mae,metrics.binary_crossentropy])
+    model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=optimizer,metrics=[metrics.mae])
     #model.compile(loss=losses.mean_squared_error, optimizer=optimizer,metrics=[metrics.mae,metrics.binary_crossentropy])
 
     # make results/ directory, if necessary
