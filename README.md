@@ -34,6 +34,11 @@ sudo apt-get install --no-install-recommends \
     libcudnn7=7.6.4.38-1+cuda10.1  \
     libcudnn7-dev=7.6.4.38-1+cuda10.1
 ```
+# Audio I/O Library Installation
+
+```bash
+sudo apt-get install -y portaudio19-dev
+```
 
 # Setup
 
@@ -53,6 +58,8 @@ Remove existing in case of reinstalls
 ```bash
  pip freeze | xargs pip uninstall -y
  ```
+
+
 
 # Data Set up
 
