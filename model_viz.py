@@ -6,10 +6,11 @@ import matplotlib.pyplot as plt
 sns.set_style(style='white')
 from pprint import pprint
 
-def vizualise_model(filter=""):
+def vizualise_model(filter="",listofmodels=None,title =""):
     # obtain the paths for the saved model history
     all_pickles = sorted(glob("results/*"+filter+"*.pickle"))
-
+    if listofmodels:
+        all_pickles = [item for item in all_pickles if item[8:-7] in listofmodels]
     #for item in all_pickles:
         #pprint(pickle.load( open( item, "rb" ) ))
     # extract the name of each model
@@ -32,7 +33,8 @@ def vizualise_model(filter=""):
     ax1.set_xlim([1, max(num_epochs)])
     plt.xlabel('Epoch')
     plt.ylabel('Training Loss')
-
+    plt.title(title+'-Training Loss')
+    plt.grid(b=True)
     # plot the validation loss vs. epoch for each model
     ax2 = fig.add_subplot(122)
     for i in range(len(all_pickles)):
@@ -43,4 +45,6 @@ def vizualise_model(filter=""):
     ax2.set_xlim([1, max(num_epochs)])
     plt.xlabel('Epoch')
     plt.ylabel('Validation Loss')
+    plt.title(title+'-Validation Loss')
+    plt.grid(b=True)
     plt.show()

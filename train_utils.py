@@ -12,7 +12,6 @@ from tensorflow.keras.layers import (Input, Lambda)
 from tensorflow.keras.optimizers import SGD,Adam
 from tensorflow.keras.callbacks import ModelCheckpoint  ,TensorBoard
 from tensorflow.keras import losses 
-from pprint import pprint
 import datetime
 import os
 
@@ -42,7 +41,6 @@ def train_model(input_to_softmax,
                 spectrogram=True,
                 mfcc_dim=13,
                 #optimizer=SGD(lr=0.02, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5),
-                #optimizer=SGD()
                 optimizer=Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False),
                 epochs=20,
                 verbose=1,
@@ -67,8 +65,7 @@ def train_model(input_to_softmax,
     model = add_ctc_loss(input_to_softmax)
 
     # CTC loss is implemented elsewhere, so use a dummy lambda function for the loss
-    model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=optimizer,metrics=[metrics.mae])
-    #model.compile(loss=losses.mean_squared_error, optimizer=optimizer,metrics=[metrics.mae,metrics.binary_crossentropy])
+    model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=optimizer)
 
     # make results/ directory, if necessary
     if not os.path.exists('results'):
@@ -83,21 +80,7 @@ def train_model(input_to_softmax,
     hist = model.fit(x=audio_gen.next_train(), steps_per_epoch=steps_per_epoch,
         epochs=epochs, validation_data=audio_gen.next_valid(), validation_steps=validation_steps,
         callbacks=[checkpointer,tensorboard_callback], verbose=verbose)
-    #pprint(audio_gen.next_train())
-    '''
-    audio_gen.load_test_data('test_corpus.json')
-    score = model.evaluate(x=audio_gen.next_test(), verbose=1,steps =steps_per_epoch)
-    print('Test loss:', score[0])
-    print('Test accuracy:', score[1])
-    '''
-    '''    .fit(x=, y=,
-          batch_size=None, epochs=,
-          verbose=1, validation_data=None,
-          steps_per_epoch=None, validation_steps=None,
-          validation_batch_size=None, validation_freq=1)
-
-    .compile(optimizer='adam', loss=None, metrics=['accuracy'], loss_weights=None,
-                  sample_weight_mode=None, weighted_metrics=None)'''
+   
     # save model loss
     with open('results/'+pickle_path, 'wb') as f:
         pickle.dump(hist.history, f)

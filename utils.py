@@ -140,4 +140,3 @@ def shuffle_data(audio_paths, durations, texts):
     durations = [durations[i] for i in p] 
     texts = [texts[i] for i in p]
     return audio_paths, durations, texts
-#print(spectrogram_from_file('../LibriSpeech/dev-clean/1272/128104/1272-128104-0001.wav').shape)

@@ -36,7 +36,7 @@ class ModelPredictor:
             raise Exception('Invalid partition!  Must be "train" or "validation"')
         
 
-        pprint(data_point)
+        #pprint(data_point)
         # obtain and decode the acoustic model's predictions
         prediction = self.input_to_softmax.predict(np.expand_dims(data_point, axis=0))
         output_length = [self.input_to_softmax.output_length(data_point.shape[0])] 
@@ -50,7 +50,7 @@ class ModelPredictor:
         print('-'*80)
     
     def get_predictions_recorded(self,spectrogram=False,recordingpath='recordings/demo.wav',):
-        """ Print a model's decoded predictions
+        """ Print a model's decoded predictions from live recordings
         Params:
             index (int): The example you would like to visualize
             partition (str): One of 'train' or 'validation'
@@ -63,7 +63,7 @@ class ModelPredictor:
         self.audio_path = recordingpath
         # obtain the true transcription and the audio feature
         data_point = data_gen.normalize(data_gen.featurize(recordingpath))
-        pprint(data_point)
+        #pprint(data_point)
         # obtain and decode the acoustic model's predictions
         prediction = self.input_to_softmax.predict(np.expand_dims(data_point, axis=0))
         output_length = [self.input_to_softmax.output_length(data_point.shape[0])] 

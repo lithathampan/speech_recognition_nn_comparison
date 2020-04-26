@@ -6,6 +6,10 @@ from utils import soundfile_load
 
 class AudioVisualizer:
     def __init__(self,index):
+        """
+        Params:
+            index (int): index of the training set for vizualization
+        """
         self.audio_gen_spectro = AudioGenerator(spectrogram=True)
         self.audio_gen_spectro.load_train_data()
         self.vis_text = self.audio_gen_spectro.train_texts[index]

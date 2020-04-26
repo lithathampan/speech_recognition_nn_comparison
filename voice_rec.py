@@ -120,6 +120,7 @@ def record_to_file(path):
     wf.close()
 
 def voice_record(path='recordings/demo.wav'):
-    print("please speak a word into the microphone")
-    record_to_file('recordings/demo.wav')
-    print("done - result written to demo.wav")
+    "Prompts user for recording"
+    print("please speak into the microphone")
+    record_to_file(path)
+    print("done - result written to "+path)
